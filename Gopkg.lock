@@ -2,6 +2,17 @@
 
 
 [[projects]]
+  digest = "1:368d3fa1f4e5e679f8d9cb337158b8bd2184d2e7aefd02f9f4d2585d9c71fb74"
+  name = "github.com/go-chi/chi"
+  packages = [
+    ".",
+    "middleware",
+  ]
+  pruneopts = "UT"
+  revision = "183768ed5df7d0b039500727c380bfbaf9229c81"
+  version = "v4.1.0"
+
+[[projects]]
   digest = "1:a3af33fd30536d9c5a7b6ad542390919e57c1125097a194c7b3d9904109a0611"
   name = "github.com/go-sql-driver/mysql"
   packages = ["."]
@@ -12,6 +23,10 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  input-imports = ["github.com/go-sql-driver/mysql"]
+  input-imports = [
+    "github.com/go-chi/chi",
+    "github.com/go-chi/chi/middleware",
+    "github.com/go-sql-driver/mysql",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1
