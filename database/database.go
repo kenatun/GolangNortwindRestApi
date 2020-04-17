@@ -3,7 +3,7 @@ package database
 import "database/sql"
 
 func InitDB() *sql.DB {
-	connectionString := "root:admin@tcp(localhost:3306)/northwind"
+	connectionString := "root:root@tcp(localhost:3307)/northwind"
 	databaseConnection, err := sql.Open("mysql", connectionString)
 	//se ejecutara cuando termina de ejecutar el main para cerrar
 	if err != nil {
