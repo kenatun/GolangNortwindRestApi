@@ -6,6 +6,7 @@ type Repository interface {
 	GetProductById(productId int) (*Product, error)
 	GetProducts(params *getProductRequest) ([]*Product, error)
 	GetTotalProducts() (int, error)
+	InsertProduct(params *getAddProductRequest) (int64, error)
 }
 
 type repository struct {
@@ -26,7 +27,7 @@ func (repo *repository) GetProductById(productId int) (*Product, error) {
 	product := &Product{}
 
 	err := row.Scan(&product.Id, &product.ProductCode, &product.ProductName, &product.Description,
-		&product.StandarCost, &product.ListPrice, &product.Category)
+		&product.StandardCost, &product.ListPrice, &product.Category)
 	if err != nil {
 		panic(err)
 	}
@@ -46,7 +47,7 @@ func (repo *repository) GetProducts(params *getProductRequest) ([]*Product, erro
 	var products []*Product
 	for results.Next() {
 		product := &Product{}
-		err = results.Scan(&product.Id, &product.ProductCode, &product.ProductName, &product.Description, &product.StandarCost,
+		err = results.Scan(&product.Id, &product.ProductCode, &product.ProductName, &product.Description, &product.StandardCost,
 			&product.ListPrice, &product.Category)
 		if err != nil {
 			panic(err)
@@ -65,4 +66,18 @@ func (repo *repository) GetTotalProducts() (int, error) {
 		panic(err)
 	}
 	return total, nil
+}
+
+func (repo *repository) InsertProduct(params *getAddProductRequest) (int64, error) {
+	const sql = `
+	INSERT INTO products
+	(product_code,product_name,category,description,list_price,standard_cost)
+	VALUES(?,?,?,?,?,?)`
+	result, err := repo.db.Exec(sql, params.ProductCode, params.ProductName,
+		params.Category, params.Description, params.ListPrice, params.StandardCost)
+	if err != nil {
+		panic(err)
+	}
+	id, _ := result.LastInsertId()
+	return id, nil
 }
