@@ -2,6 +2,7 @@ package product
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"strconv"
 
@@ -16,6 +17,12 @@ func MakeHttpHandler(s Service) http.Handler {
 		getProductByIdRequestDecoder,
 		kithttp.EncodeJSONResponse)
 	r.Method(http.MethodGet, "/{id}", getProductByIdHandler)
+
+	getProducthandler := kithttp.NewServer(makeGetProductsEndPoint(s),
+		getProductsRequestDecoder,
+		kithttp.EncodeJSONResponse)
+	r.Method(http.MethodPost, "/paginated", getProducthandler)
+
 	return r
 }
 
@@ -25,4 +32,13 @@ func getProductByIdRequestDecoder(context context.Context, r *http.Request) (int
 		ProductID: productId,
 	}, nil
 
+}
+
+func getProductsRequestDecoder(context context.Context, r *http.Request) (interface{}, error) {
+	request := getProductRequest{}
+	err := json.NewDecoder(r.Body).Decode(&request)
+	if err != nil {
+		panic(err)
+	}
+	return request, nil
 }
