@@ -1,5 +1,7 @@
 package product
 
+import "github.com/GolangNortwindRestApi/helper"
+
 type Service interface {
 	GetProductById(param *getProductByIdRequest) (*Product, error)
 	Getproducts(params *getProductRequest) (*ProductList, error)
@@ -26,13 +28,9 @@ func (s *service) GetProductById(param *getProductByIdRequest) (*Product, error)
 
 func (s *service) Getproducts(params *getProductRequest) (*ProductList, error) {
 	products, err := s.repo.GetProducts(params)
-	if err != nil {
-		panic(err)
-	}
+	helper.Catch(err)
 	totalProducts, err := s.repo.GetTotalProducts()
-	if err != nil {
-		panic(err)
-	}
+	helper.Catch(err)
 	return &ProductList{Data: products, TotalRecords: totalProducts}, nil
 }
 
@@ -50,12 +48,8 @@ func (s *service) DeleteProduct(params *deleteProductRequest) (int64, error) {
 
 func (s *service) GetBestSellers() (*ProductTopResponse, error) {
 	products, err := s.repo.GetBestSellers()
-	if err != nil {
-		panic(err)
-	}
+	helper.Catch(err)
 	totalVentas, err := s.repo.GetTotalVentas()
-	if err != nil {
-		panic(err)
-	}
+	helper.Catch(err)
 	return &ProductTopResponse{Data: products, TotalVentas: totalVentas}, err
 }
