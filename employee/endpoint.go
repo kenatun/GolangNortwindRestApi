@@ -14,6 +14,7 @@ type getEmployeesRequest struct {
 type getEmployeeByIdRequest struct {
 	EmployeeId string
 }
+type getBestEmployeeRequest struct{}
 
 func makeGetEmployeesEndPoint(s Service) endpoint.Endpoint {
 	getEmployeesEndPoint := func(ctx context.Context, request interface{}) (interface{}, error) {
@@ -33,4 +34,13 @@ func makeEmployeeByIdEndpoint(s Service) endpoint.Endpoint {
 		return result, nil
 	}
 	return getEmployeeByIdRequest
+}
+
+func makeGetbestEmployeeEndPoint(s Service) endpoint.Endpoint {
+	getBestEmployeeEndPoint := func(_ context.Context, request interface{}) (interface{}, error) {
+		result, err := s.GetBestEmployee()
+		helper.Catch(err)
+		return result, nil
+	}
+	return getBestEmployeeEndPoint
 }

@@ -10,6 +10,7 @@ type Repository interface {
 	GetEmployees(params *getEmployeesRequest) ([]*Employee, error)
 	GetTotalEmployees() (int64, error)
 	GetEmployeeById(param *getEmployeeByIdRequest) (*Employee, error)
+	GetBestEmployee() (*BestEmployee, error)
 }
 
 type repository struct {
@@ -70,6 +71,22 @@ func (repo *repository) GetEmployeeById(param *getEmployeeByIdRequest) (*Employe
 	err := row.Scan(&employee.ID, &employee.FirstName, &employee.Lastname, &employee.Company,
 		&employee.EmailAddress, &employee.JobTitle, &employee.BusinessPhone, &employee.HomePhone,
 		&employee.MobilePhone, &employee.FaxNumber, &employee.Address)
+	helper.Catch(err)
+
+	return employee, nil
+}
+
+func (repo *repository) GetBestEmployee() (*BestEmployee, error) {
+	const sql = `select e.id,count(e.id) as totalVentas,e.first_name,e.last_name
+				from orders o
+				inner join employees e on o.employee_id = e.id
+				group by o.employee_id
+				order by totalVentas desc
+				limit 1`
+
+	row := repo.db.QueryRow(sql)
+	employee := &BestEmployee{}
+	err := row.Scan(&employee.ID, &employee.TotalVentas, &employee.FirstName, &employee.LastName)
 	helper.Catch(err)
 
 	return employee, nil
