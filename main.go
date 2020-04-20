@@ -16,7 +16,7 @@ func main() {
 
 	var (
 		productRepository  = product.NewRepository(databaseConnection)
-		employeeRepository = employee.Newrepository(databaseConnection)
+		employeeRepository = employee.NewRepository(databaseConnection)
 	)
 
 	var (

@@ -11,6 +11,9 @@ type getEmployeesRequest struct {
 	Limit  int
 	Offset int
 }
+type getEmployeeByIdRequest struct {
+	EmployeeId string
+}
 
 func makeGetEmployeesEndPoint(s Service) endpoint.Endpoint {
 	getEmployeesEndPoint := func(ctx context.Context, request interface{}) (interface{}, error) {
@@ -20,4 +23,14 @@ func makeGetEmployeesEndPoint(s Service) endpoint.Endpoint {
 		return result, nil
 	}
 	return getEmployeesEndPoint
+}
+
+func makeEmployeeByIdEndpoint(s Service) endpoint.Endpoint {
+	getEmployeeByIdRequest := func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(getEmployeeByIdRequest)
+		result, err := s.GetEmployeeById(&req)
+		helper.Catch(err)
+		return result, nil
+	}
+	return getEmployeeByIdRequest
 }

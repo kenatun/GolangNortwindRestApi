@@ -16,6 +16,11 @@ func MakeHttpHandler(s Service) http.Handler {
 		getEmployeesRequestDecoder,
 		kithttp.EncodeJSONResponse)
 	r.Method(http.MethodPost, "/paginated", getEmployeesHandler)
+
+	getEmployeeByIdHandler := kithttp.NewServer(makeEmployeeByIdEndpoint(s),
+		getEmployeeByIdRequestDecoder,
+		kithttp.EncodeJSONResponse)
+	r.Method(http.MethodGet, "/{id}", getEmployeeByIdHandler)
 	return r
 }
 
@@ -24,4 +29,10 @@ func getEmployeesRequestDecoder(_ context.Context, r *http.Request) (interface{}
 	err := json.NewDecoder(r.Body).Decode(&request)
 	helper.Catch(err)
 	return request, nil
+}
+
+func getEmployeeByIdRequestDecoder(_ context.Context, r *http.Request) (interface{}, error) {
+	return getEmployeeByIdRequest{
+		EmployeeId: chi.URLParam(r, "id"),
+	}, nil
 }
