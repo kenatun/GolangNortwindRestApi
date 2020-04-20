@@ -2,6 +2,7 @@ package order
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"strconv"
 
@@ -13,9 +14,14 @@ import (
 func MakeHttpHandler(s Service) http.Handler {
 	r := chi.NewRouter()
 
-	getOrderByIdRequest := kithttp.NewServer(makeGetOrderByIdEndPoint(s),
+	getOrderByIdHandler := kithttp.NewServer(makeGetOrderByIdEndPoint(s),
 		getOrderByIdRequestDecoder, kithttp.EncodeJSONResponse)
-	r.Method(http.MethodGet, "/{id}", getOrderByIdRequest)
+	r.Method(http.MethodGet, "/{id}", getOrderByIdHandler)
+
+	getOrdersHandler := kithttp.NewServer(makeGetOrdersEndPoint(s),
+		getOrderRequestDecoder,
+		kithttp.EncodeJSONResponse)
+	r.Method(http.MethodPost, "/paginated", getOrdersHandler)
 	return r
 
 }
@@ -26,4 +32,12 @@ func getOrderByIdRequestDecoder(_ context.Context, r *http.Request) (interface{}
 	return getOrderByIdRequest{
 		orderId: orderId,
 	}, nil
+}
+
+func getOrderRequestDecoder(_ context.Context, r *http.Request) (interface{}, error) {
+	request := getOrdersRequest{}
+	err := json.NewDecoder(r.Body).Decode(&request)
+	helper.Catch(err)
+
+	return request, nil
 }

@@ -2,12 +2,15 @@ package order
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/GolangNortwindRestApi/helper"
 )
 
 type Repository interface {
 	GetOrderById(param *getOrderByIdRequest) (*OrderItem, error)
+	GetOrders(param *getOrdersRequest) ([]*OrderItem, error)
+	GetTotalOrders(param *getOrdersRequest) (int64, error)
 }
 type repository struct {
 	db *sql.DB
@@ -63,4 +66,69 @@ func GetOrderDetail(repo *repository, orderId *int64) ([]*OrderDetailItem, error
 	}
 	return orders, nil
 
+}
+
+func (repo *repository) GetOrders(param *getOrdersRequest) ([]*OrderItem, error) {
+	var filter string
+	if param.Status != nil {
+		filter += fmt.Sprintf(" AND o.status_id = %v ", param.Status.(float64))
+	}
+	if param.DateFrom != nil && param.DateTo == nil {
+		filter += fmt.Sprintf(" AND o.order_date >= '%v' ", param.DateFrom.(string))
+	}
+	if param.DateFrom == nil && param.DateTo != nil {
+		filter += fmt.Sprintf(" AND o.order_date <= '%v' ", param.DateTo.(string))
+	}
+	if param.DateFrom != nil && param.DateTo != nil {
+		filter += fmt.Sprintf(" AND o.order_date between '%v' and '%v' ", param.DateFrom.(string), param.DateTo.(string))
+	}
+	var sql = `select o.id,o.customer_id,o.order_date,o.status_id,os.status_name,
+				concat(c.first_name,'',c.last_name) as customer_name
+			from orders o
+			inner join orders_status os on o.status_id = os.id
+			inner join customers c on o.customer_id = c.id
+			where 1=1 `
+
+	sql = sql + filter + "LIMIT ? OFFSET ?"
+
+	results, err := repo.db.Query(sql, param.Limit, param.Offset)
+	helper.Catch(err)
+
+	var orders []*OrderItem
+	for results.Next() {
+		order := &OrderItem{}
+		err = results.Scan(&order.ID, &order.CustomerID, &order.OrderDate, &order.StatusId, &order.StatusName,
+			&order.Customer)
+		helper.Catch(err)
+
+		orderDetail, err := GetOrderDetail(repo, &order.ID)
+		helper.Catch(err)
+
+		order.Data = orderDetail
+		orders = append(orders, order)
+	}
+	return orders, err
+}
+
+func (repo *repository) GetTotalOrders(param *getOrdersRequest) (int64, error) {
+	var filter string
+	if param.Status != nil {
+		filter += fmt.Sprintf(" AND o.status_id = %v ", param.Status.(float64))
+	}
+	if param.DateFrom != nil && param.DateTo == nil {
+		filter += fmt.Sprintf(" AND o.order_date >= '%v' ", param.DateFrom.(string))
+	}
+	if param.DateFrom == nil && param.DateTo != nil {
+		filter += fmt.Sprintf(" AND o.order_date <= '%v' ", param.DateTo.(string))
+	}
+	if param.DateFrom != nil && param.DateTo != nil {
+		filter += fmt.Sprintf(" AND o.order_date between '%v' and '%v' ", param.DateFrom.(string), param.DateTo.(string))
+	}
+	var sql = "select count(*) from orders o WHERE 1=1 " + filter
+	row := repo.db.QueryRow(sql)
+	var total int64
+	err := row.Scan(&total)
+	helper.Catch(err)
+
+	return total, nil
 }
