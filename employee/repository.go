@@ -12,6 +12,7 @@ type Repository interface {
 	GetEmployeeById(param *getEmployeeByIdRequest) (*Employee, error)
 	GetBestEmployee() (*BestEmployee, error)
 	InsertEmployee(params *addEmployeeRequest) (int64, error)
+	UpdateEmployee(params *updateEmployeeRequest) (int64, error)
 }
 
 type repository struct {
@@ -107,4 +108,25 @@ func (repo *repository) InsertEmployee(params *addEmployeeRequest) (int64, error
 	id, err := result.LastInsertId()
 	helper.Catch(err)
 	return id, nil
+}
+
+func (repo *repository) UpdateEmployee(params *updateEmployeeRequest) (int64, error) {
+	const sql = ` 
+		update employees
+		set first_name =?,
+		last_name =?,
+		company =?,
+		address =?,
+		business_phone =?,
+		email_address =?,
+		fax_number =?,
+		home_phone =?,
+		job_title =?,
+		mobile_phone =?
+		where id = ?`
+	_, err := repo.db.Exec(sql, params.FirstName, params.LastName, params.Company,
+		params.Address, params.BusinessPhone, params.EmailAddress, params.FaxNumber,
+		params.HomePhone, params.JobTitle, params.MobilePhone, params.ID)
+	helper.Catch(err)
+	return params.ID, nil
 }
