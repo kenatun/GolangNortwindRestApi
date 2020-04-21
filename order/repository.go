@@ -15,6 +15,7 @@ type Repository interface {
 	InsertOrderDetail(param *addOrderDetailRequest) (int64, error)
 	UpdateOrder(param *addOrderRequest) (int64, error)
 	UpdateOrderDetail(param *addOrderDetailRequest) (int64, error)
+	DeleteOrderDetail(param *deleteOrderDetailRequest) (int64, error)
 }
 type repository struct {
 	db *sql.DB
@@ -184,4 +185,14 @@ func (repo *repository) UpdateOrderDetail(param *addOrderDetailRequest) (int64, 
 	_, err := repo.db.Exec(sql, param.Quantity, param.UnitPrice, param.ID)
 	helper.Catch(err)
 	return param.ID, nil
+}
+
+func (repo *repository) DeleteOrderDetail(param *deleteOrderDetailRequest) (int64, error) {
+	const sql = `delete from order_details where id= ?`
+	result, err := repo.db.Exec(sql, param.OrderDetailID)
+	helper.Catch(err)
+	count, err := result.RowsAffected()
+	helper.Catch(err)
+
+	return count, nil
 }

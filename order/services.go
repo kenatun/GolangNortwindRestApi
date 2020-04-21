@@ -7,6 +7,7 @@ type Service interface {
 	GetOrders(param *getOrdersRequest) (*OrderList, error)
 	InsertOrder(param *addOrderRequest) (int64, error)
 	UpdateOrder(param *addOrderRequest) (int64, error)
+	DeleteOrderDetail(param *deleteOrderDetailRequest) (int64, error)
 }
 type service struct {
 	repo Repository
@@ -57,4 +58,8 @@ func (s *service) UpdateOrder(param *addOrderRequest) (int64, error) {
 		helper.Catch(err)
 	}
 	return orderId, nil
+}
+
+func (s *service) DeleteOrderDetail(param *deleteOrderDetailRequest) (int64, error) {
+	return s.repo.DeleteOrderDetail(param)
 }
