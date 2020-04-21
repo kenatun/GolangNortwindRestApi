@@ -5,6 +5,7 @@ import "github.com/GolangNortwindRestApi/helper"
 type Service interface {
 	GetOrderById(params *getOrderByIdRequest) (*OrderItem, error)
 	GetOrders(param *getOrdersRequest) (*OrderList, error)
+	InsertOrder(param *addOrderRequest) (int64, error)
 }
 type service struct {
 	repo Repository
@@ -26,4 +27,18 @@ func (s *service) GetOrders(param *getOrdersRequest) (*OrderList, error) {
 	totalRecords, err := s.repo.GetTotalOrders(param)
 	helper.Catch(err)
 	return &OrderList{Data: orders, TotalRecords: totalRecords}, nil
+}
+
+func (s *service) InsertOrder(param *addOrderRequest) (int64, error) {
+	orderId, err := s.repo.InsertOrder(param)
+	helper.Catch(err)
+
+	for _, detail := range param.OrderDetails {
+		detail.OrderID = orderId
+		_, err := s.repo.insertOrderDetail(&detail)
+		helper.Catch(err)
+
+	}
+	return orderId, nil
+
 }
