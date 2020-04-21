@@ -6,6 +6,7 @@ type Service interface {
 	GetOrderById(params *getOrderByIdRequest) (*OrderItem, error)
 	GetOrders(param *getOrdersRequest) (*OrderList, error)
 	InsertOrder(param *addOrderRequest) (int64, error)
+	UpdateOrder(param *addOrderRequest) (int64, error)
 }
 type service struct {
 	repo Repository
@@ -35,10 +36,25 @@ func (s *service) InsertOrder(param *addOrderRequest) (int64, error) {
 
 	for _, detail := range param.OrderDetails {
 		detail.OrderID = orderId
-		_, err := s.repo.insertOrderDetail(&detail)
+		_, err := s.repo.InsertOrderDetail(&detail)
 		helper.Catch(err)
 
 	}
 	return orderId, nil
+}
 
+func (s *service) UpdateOrder(param *addOrderRequest) (int64, error) {
+	orderId, err := s.repo.UpdateOrder(param)
+	helper.Catch(err)
+
+	for _, detail := range param.OrderDetails {
+		detail.OrderID = orderId
+		if detail.ID == 0 {
+			_, err = s.repo.InsertOrderDetail(&detail)
+		} else {
+			_, err = s.repo.UpdateOrderDetail(&detail)
+		}
+		helper.Catch(err)
+	}
+	return orderId, nil
 }
