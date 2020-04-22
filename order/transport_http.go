@@ -31,7 +31,7 @@ func MakeHttpHandler(s Service) http.Handler {
 	updateOrderHandler := kithttp.NewServer(makeUpdateOrderEndpoint(s),
 		getUpdateOrderRequestDecoder,
 		kithttp.EncodeJSONResponse)
-	r.Method(http.MethodPost, "/", updateOrderHandler)
+	r.Method(http.MethodPut, "/", updateOrderHandler)
 
 	deleteOrderDetailHandler := kithttp.NewServer(makeDeleteOrderDetailEndPoint(s),
 		getDeleteOrderDetailRequestDecoder,
